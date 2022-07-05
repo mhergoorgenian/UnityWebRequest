@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 
 public class apiforaccount : MonoBehaviour
 {
-    string url= "http://82.99.219.170:8888/app";
+    string url= "your IP or domain address";
     string yourAPIKey;
     public InputField loginusername;
     public InputField loginpassword;
@@ -27,14 +27,16 @@ public class apiforaccount : MonoBehaviour
 
 
     
-    
+    //login codes
      IEnumerator loginRequest(string url)
     {
         
         WWWForm form = new WWWForm();
+        
         form.AddField("username", loginusername.text);
         form.AddField("password", loginpassword.text);
 
+        //make post request for checking login
         UnityWebRequest uwr = UnityWebRequest.Post(url, form);
 
         yield return uwr.SendWebRequest();
@@ -46,11 +48,13 @@ public class apiforaccount : MonoBehaviour
         else
         {
             Debug.Log("Received: " + uwr.downloadHandler.text);
+            //convert server data to json
             users userdata = JsonUtility.FromJson<users>(uwr.downloadHandler.text);
             var token = userdata.token;
             if (token!=null)
             {
                 Debug.Log(userdata.token);
+                //save token on phone
                 PlayerPrefs.SetString("usertoken", userdata.token);
                 SceneManager.LoadScene("arscene");
 
@@ -64,7 +68,7 @@ public class apiforaccount : MonoBehaviour
 
 
 
-
+    //register code
     IEnumerator registerRequest(string url)
     {
 
@@ -74,9 +78,10 @@ public class apiforaccount : MonoBehaviour
         form.AddField("username", registerusername.text);
         form.AddField("password", registerpassword.text);
         form.AddField("password2", confirmpassword.text);
-
+        //checking fields
         if (registerusername.text.Length >= 4 && registerpassword.text.Length >= 6 && confirmpassword.text.Length >= 6 && registerpassword.text == confirmpassword.text && IsValidEmail(email.text))
         {
+            //send register request       
             UnityWebRequest uwr = UnityWebRequest.Post(url, form);
 
             yield return uwr.SendWebRequest();
@@ -87,6 +92,7 @@ public class apiforaccount : MonoBehaviour
             }
             else
             {
+            // if data is correct responsoe code is 200
                 if (uwr.responseCode == 200)
                 {
                     Debug.Log("Received: " + uwr.downloadHandler.text);
@@ -113,8 +119,8 @@ public class apiforaccount : MonoBehaviour
     public void onregister()
     {
         StartCoroutine(registerRequest(url + "/register/"));
-    }
-
+    } 
+    // checking email validation
     bool IsValidEmail(string email)
     {
         var trimmedEmail = email.Trim();
